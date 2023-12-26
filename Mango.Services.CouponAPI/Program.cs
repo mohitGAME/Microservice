@@ -3,18 +3,28 @@ using Mango.Services.CouponAPI;
 using Mango.Services.CouponAPI.Data;
 using Mango.Services.CouponAPI.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddHttpLogging(logging =>
+{
+    logging.LoggingFields = HttpLoggingFields.All;
+    logging.RequestHeaders.Add("sec-ch-ua");
+    logging.ResponseHeaders.Add("MyResponseHeader");
+    logging.MediaTypeOptions.AddText("application/javascript");
+    logging.RequestBodyLogLimit = 4096;
+    logging.ResponseBodyLogLimit = 4096;
+    logging.CombineLogs = true;
+});
 // Add services to the container.
 
 builder.Services.AddDbContext<AppDbContext>(option =>
 {
-    option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    option.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 IMapper mapper = MappingConfig.RegisterMaps().CreateMapper();
 builder.Services.AddSingleton(mapper);
@@ -31,8 +41,9 @@ builder.Services.AddSwaggerGen(option =>
         Description = "Enter the Bearer Authorization string as following: `Bearer Generated-JWT-Token`",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
+        Scheme = "Bearer",
     });
+
     option.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -52,6 +63,7 @@ builder.AddAppAuthetication();
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+app.UseHttpLogging();
 
 // Configure the HTTP request pipeline.
 app.UseSwagger();
@@ -75,13 +87,11 @@ app.Run();
 
 void ApplyMigration()
 {
-    using (var scope = app.Services.CreateScope())
-    {
-        var _db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    using var scope = app.Services.CreateScope();
+    var _db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-        if (_db.Database.GetPendingMigrations().Count() > 0)
-        {
-            _db.Database.Migrate();
-        }
+    if (_db.Database.GetPendingMigrations().Any())
+    {
+        _db.Database.Migrate();
     }
 }

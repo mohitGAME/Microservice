@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <UserSecretsId>a1c22263-4343-44ea-a7fc-d34ad8e9f64a</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Protos\productRating.proto" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+	  <PackageReference Include="Grpc.AspNetCore" Version="2.59.0" />
+
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="Protos\productRating.proto" GrpcServices="Server" />
+  </ItemGroup>
+
+</Project>

@@ -1,33 +1,33 @@
-﻿using Azure.Messaging.ServiceBus;
+﻿using MassTransit;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using RabbitMQ.Client;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Mango.MessageBus
 {
     public class MessageBus : IMessageBus
     {
+        private readonly IPublishEndpoint _publishEndpoint;
 
-        private string connectionString = "Endpoint=sb://mangoweb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=HjoslS58pPHtAULb0tay/jx4Ys0+MO5/R+ASbCcFTG0=";
+        public MessageBus(IPublishEndpoint publishEndpoint)
+        {
+            _publishEndpoint = publishEndpoint;
+        }
 
         public async Task PublishMessage(object message, string topic_queue_Name)
         {
-            await using var client = new ServiceBusClient(connectionString);
+            await _publishEndpoint.Publish(message);
+            ////await _publishEndpoint.Publish(message);
+            //var jsonMessage = JsonConvert.SerializeObject(message);
+            //var factory = new ConnectionFactory { HostName = "localhost" };
+            //using var connection = factory.CreateConnection();
+            //using var channel = connection.CreateModel();
 
-            ServiceBusSender sender = client.CreateSender(topic_queue_Name);
-
-            var jsonMessage = JsonConvert.SerializeObject(message);
-            ServiceBusMessage finalMessage = new ServiceBusMessage(Encoding
-                .UTF8.GetBytes(jsonMessage))
-            {
-                CorrelationId = Guid.NewGuid().ToString(),
-            };
-
-            await sender.SendMessageAsync(finalMessage);
-            await client.DisposeAsync();
+            //var body = Encoding.UTF8.GetBytes(jsonMessage);
+            //channel.BasicPublish(exchange: string.Empty,
+            //                     routingKey: topic_queue_Name,
+            //                     basicProperties: null,
+            //                     body: body);
         }
     }
 }

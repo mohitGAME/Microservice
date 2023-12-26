@@ -4,6 +4,9 @@ using Mango.Services.ProductAPI.Models;
 using Mango.Services.ProductAPI.Models.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Mango.Contracts.Product;
+using Mango.MessageBus;
+using Mango.Services.ProductGrpc.Services;
 
 namespace Mango.Services.ProductAPI.Controllers
 {
@@ -14,19 +17,24 @@ namespace Mango.Services.ProductAPI.Controllers
         private readonly AppDbContext _db;
         private ResponseDto _response;
         private IMapper _mapper;
+        private readonly IMessageBus _messageBus;
+        private readonly ProductRatingService _productPriceService;
 
-        public ProductAPIController(AppDbContext db, IMapper mapper)
+        public ProductAPIController(AppDbContext db, IMapper mapper, IMessageBus messageBus, ProductRatingService productPriceService)
         {
             _db = db;
             _mapper = mapper;
             _response = new ResponseDto();
+            _messageBus = messageBus;
+            _productPriceService = productPriceService;
         }
 
         [HttpGet]
-        public ResponseDto Get()
+        public async Task<ResponseDto> GetAsync()
         {
             try
             {
+                //await _productPriceService.Ment();
                 IEnumerable<Product> objList = _db.Products.ToList();
                 _response.Result = _mapper.Map<IEnumerable<ProductDto>>(objList);
             }
@@ -44,7 +52,7 @@ namespace Mango.Services.ProductAPI.Controllers
         {
             try
             {
-                Product obj = _db.Products.First(u=>u.ProductId==id);
+                Product obj = _db.Products.First(u => u.ProductId == id);
                 _response.Result = _mapper.Map<ProductDto>(obj);
             }
             catch (Exception ex)
@@ -55,29 +63,29 @@ namespace Mango.Services.ProductAPI.Controllers
             return _response;
         }
 
-       [HttpPost]
-        [Authorize(Roles = "ADMIN")]
-        public ResponseDto Post(ProductDto ProductDto)
+        [HttpPost]
+        //[Authorize(Roles = "ADMIN")]
+        public async Task<ResponseDto> PostAsync(ProductDto ProductDto)
         {
             try
             {
                 Product product = _mapper.Map<Product>(ProductDto);
-                _db.Products.Add(product);
-                _db.SaveChanges();
+                //_db.Products.Add(product);
+                //_db.SaveChanges();
 
                 if (ProductDto.Image != null)
                 {
-                   
+
                     string fileName = product.ProductId + Path.GetExtension(ProductDto.Image.FileName);
                     string filePath = @"wwwroot\ProductImages\" + fileName;
 
                     //I have added the if condition to remove the any image with same name if that exist in the folder by any change
-                        var directoryLocation = Path.Combine(Directory.GetCurrentDirectory(), filePath);
-                        FileInfo file = new FileInfo(directoryLocation);
-                        if (file.Exists)
-                        {
-                            file.Delete();
-                        }
+                    var directoryLocation = Path.Combine(Directory.GetCurrentDirectory(), filePath);
+                    FileInfo file = new(directoryLocation);
+                    if (file.Exists)
+                    {
+                        file.Delete();
+                    }
 
                     var filePathDirectory = Path.Combine(Directory.GetCurrentDirectory(), filePath);
                     using (var fileStream = new FileStream(filePathDirectory, FileMode.Create))
@@ -85,15 +93,18 @@ namespace Mango.Services.ProductAPI.Controllers
                         ProductDto.Image.CopyTo(fileStream);
                     }
                     var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.Value}{HttpContext.Request.PathBase.Value}";
-                    product.ImageUrl = baseUrl+ "/ProductImages/"+ fileName;
+                    product.ImageUrl = baseUrl + "/ProductImages/" + fileName;
                     product.ImageLocalPath = filePath;
                 }
                 else
                 {
                     product.ImageUrl = "https://placehold.co/600x400";
                 }
-                _db.Products.Update(product);
-                _db.SaveChanges();
+                //_db.Products.Update(product);
+                //_db.SaveChanges();
+                var s = new ProductCreated(product.ProductId, product.Name, product.Price, product.Description, product.CategoryName, product.ImageUrl);
+                await _messageBus.PublishMessage( s, null);
+
                 _response.Result = _mapper.Map<ProductDto>(product);
             }
             catch (Exception ex)
@@ -158,7 +169,7 @@ namespace Mango.Services.ProductAPI.Controllers
         {
             try
             {
-                Product obj = _db.Products.First(u=>u.ProductId==id);
+                Product obj = _db.Products.First(u => u.ProductId == id);
                 if (!string.IsNullOrEmpty(obj.ImageLocalPath))
                 {
                     var oldFilePathDirectory = Path.Combine(Directory.GetCurrentDirectory(), obj.ImageLocalPath);

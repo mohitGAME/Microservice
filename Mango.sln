@@ -29,7 +29,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mango.Services.OrderAPI", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mango.Services.RewardAPI", "Mango.Services.RewardAPI\Mango.Services.RewardAPI.csproj", "{FAB2B20F-6B0E-46F7-AF2C-A31897D57E3C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mango.GatewaySolution", "Mango.GatewaySolution\Mango.GatewaySolution.csproj", "{7C0491EC-ABCA-4076-8C83-034DC2CEB825}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mango.GatewaySolution", "Mango.GatewaySolution\Mango.GatewaySolution.csproj", "{7C0491EC-ABCA-4076-8C83-034DC2CEB825}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mango.Contracts.Product", "Mango.Contracts.Product\Mango.Contracts.Product.csproj", "{E55BDC25-10D2-4E9F-9F14-3EEDE48C1854}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mango.Services.ProductReviewAPI", "Mango.Services.ProductReviewAPI\Mango.Services.ProductReviewAPI.csproj", "{A0481C15-3E3F-45A0-AFF3-A725C0698501}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StarWars", "StarWars\StarWars.csproj", "{7581C542-9432-46FA-8EE2-81033B5619A6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Contracts", "Contracts", "{78F5094C-59DA-42ED-9477-8BB82E7F443D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -77,6 +85,18 @@ Global
 		{7C0491EC-ABCA-4076-8C83-034DC2CEB825}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C0491EC-ABCA-4076-8C83-034DC2CEB825}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C0491EC-ABCA-4076-8C83-034DC2CEB825}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E55BDC25-10D2-4E9F-9F14-3EEDE48C1854}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E55BDC25-10D2-4E9F-9F14-3EEDE48C1854}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E55BDC25-10D2-4E9F-9F14-3EEDE48C1854}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E55BDC25-10D2-4E9F-9F14-3EEDE48C1854}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A0481C15-3E3F-45A0-AFF3-A725C0698501}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0481C15-3E3F-45A0-AFF3-A725C0698501}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0481C15-3E3F-45A0-AFF3-A725C0698501}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0481C15-3E3F-45A0-AFF3-A725C0698501}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7581C542-9432-46FA-8EE2-81033B5619A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7581C542-9432-46FA-8EE2-81033B5619A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7581C542-9432-46FA-8EE2-81033B5619A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7581C542-9432-46FA-8EE2-81033B5619A6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -92,6 +112,9 @@ Global
 		{8DC40FF4-5BD2-4961-836E-7B418DEED3B9} = {ADB819A7-64B4-4AFF-BA2B-69EFB3F6577A}
 		{FAB2B20F-6B0E-46F7-AF2C-A31897D57E3C} = {ADB819A7-64B4-4AFF-BA2B-69EFB3F6577A}
 		{7C0491EC-ABCA-4076-8C83-034DC2CEB825} = {D844D97F-14F9-4A40-9C15-68170C55DFF7}
+		{E55BDC25-10D2-4E9F-9F14-3EEDE48C1854} = {78F5094C-59DA-42ED-9477-8BB82E7F443D}
+		{A0481C15-3E3F-45A0-AFF3-A725C0698501} = {ADB819A7-64B4-4AFF-BA2B-69EFB3F6577A}
+		{7581C542-9432-46FA-8EE2-81033B5619A6} = {78F5094C-59DA-42ED-9477-8BB82E7F443D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {929D2BC7-133A-46CF-89C4-0315B8019576}

@@ -4,14 +4,10 @@ using Newtonsoft.Json;
 
 namespace Mango.Services.ShoppingCartAPI.Service
 {
-    public class ProductService : IProductService
+    public class ProductService(IHttpClientFactory clientFactory) : IProductService
     {
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IHttpClientFactory _httpClientFactory = clientFactory;
 
-        public ProductService(IHttpClientFactory clientFactory)
-        {
-            _httpClientFactory = clientFactory;
-        }
         public async Task<IEnumerable<ProductDto>> GetProducts()
         {
             var client = _httpClientFactory.CreateClient("Product");

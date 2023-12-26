@@ -4,8 +4,10 @@ using Mango.Services.ShoppingCartAPI;
 using Mango.Services.ShoppingCartAPI.Data;
 using Mango.Services.ShoppingCartAPI.Extensions;
 using Mango.Services.ShoppingCartAPI.Service;
+using Mango.Services.ShoppingCartAPI.Service.Consumers;
 using Mango.Services.ShoppingCartAPI.Service.IService;
 using Mango.Services.ShoppingCartAPI.Utility;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -14,16 +16,33 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddMassTransit(x =>
+{
+    x.AddConsumer<ProductCreatedConsumer>();
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host("localhost", "/", h =>
+        {
+            h.Username("guest");
+            h.Password("guest");
+        });
+
+        cfg.ConfigureEndpoints(context);
+    });
+});
+
+builder.Services.AddMassTransitHostedService();
 // Add services to the container.
 
 builder.Services.AddDbContext<AppDbContext>(option =>
 {
-    option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    option.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 IMapper mapper = MappingConfig.RegisterMaps().CreateMapper();
 builder.Services.AddSingleton(mapper);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<IProductService, ProductService>();
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<BackendApiAuthenticationHttpClientHandler>();
 builder.Services.AddScoped<ICouponService, CouponService>();
@@ -32,6 +51,7 @@ builder.Services.AddHttpClient("Product", u => u.BaseAddress =
 new Uri(builder.Configuration["ServiceUrls:ProductAPI"])).AddHttpMessageHandler<BackendApiAuthenticationHttpClientHandler>();
 builder.Services.AddHttpClient("Coupon", u => u.BaseAddress =
 new Uri(builder.Configuration["ServiceUrls:CouponAPI"])).AddHttpMessageHandler<BackendApiAuthenticationHttpClientHandler>();
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

@@ -1,0 +1,17 @@
+syntax = "proto3";
+option csharp_namespace = "Mango.Services.ProductReviewAPI.ProductGrpc";
+package productRating;
+
+service productRating {
+  rpc GetProductRating(ProductRatingRequest) returns (stream RatingResponse);
+}
+
+message ProductRatingRequest {
+  int32  id = 1;
+}
+
+message RatingResponse {
+  int32  liveRating = 1;
+}
+
+

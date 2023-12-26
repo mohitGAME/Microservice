@@ -3,7 +3,10 @@ using Mango.Services.EmailAPI.Message;
 using Mango.Services.EmailAPI.Models.Dto;
 using Mango.Services.EmailAPI.Services;
 using Newtonsoft.Json;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using System.Text;
+using System.Threading.Channels;
 
 namespace Mango.Services.EmailAPI.Messaging
 {
@@ -19,52 +22,97 @@ namespace Mango.Services.EmailAPI.Messaging
         private ServiceBusProcessor _emailOrderPlacedProcessor;
         private ServiceBusProcessor _emailCartProcessor;
         private ServiceBusProcessor _registerUserProcessor;
+        private IModel channel;
+
 
         public AzureServiceBusConsumer(IConfiguration configuration, EmailService emailService)
         {
-            _emailService=emailService;
+            _emailService = emailService;
             _configuration = configuration;
 
-            serviceBusConnectionString = _configuration.GetValue<string>("ServiceBusConnectionString");
+            //serviceBusConnectionString = _configuration.GetValue<string>("ServiceBusConnectionString");
 
-            emailCartQueue = _configuration.GetValue<string>("TopicAndQueueNames:EmailShoppingCartQueue");
+            //emailCartQueue = _configuration.GetValue<string>("TopicAndQueueNames:EmailShoppingCartQueue");
             registerUserQueue = _configuration.GetValue<string>("TopicAndQueueNames:RegisterUserQueue");
-            orderCreated_Topic = _configuration.GetValue<string>("TopicAndQueueNames:OrderCreatedTopic");
-            orderCreated_Email_Subscription = _configuration.GetValue<string>("TopicAndQueueNames:OrderCreated_Email_Subscription");
+            //orderCreated_Topic = _configuration.GetValue<string>("TopicAndQueueNames:OrderCreatedTopic");
+            //orderCreated_Email_Subscription = _configuration.GetValue<string>("TopicAndQueueNames:OrderCreated_Email_Subscription");
 
-            var client = new ServiceBusClient(serviceBusConnectionString);
-            _emailCartProcessor = client.CreateProcessor(emailCartQueue);
-            _registerUserProcessor = client.CreateProcessor(registerUserQueue);
-            _emailOrderPlacedProcessor = client.CreateProcessor(orderCreated_Topic,orderCreated_Email_Subscription);
+            //var client = new ServiceBusClient(serviceBusConnectionString);
+            //_emailCartProcessor = client.CreateProcessor(emailCartQueue);
+            //_registerUserProcessor = client.CreateProcessor(registerUserQueue);
+            //_emailOrderPlacedProcessor = client.CreateProcessor(orderCreated_Topic,orderCreated_Email_Subscription);
+
+          
+            //var body = Encoding.UTF8.GetBytes("test");
+            //channel.BasicPublish(exchange: string.Empty,
+            //                     routingKey: registerUserQueue,
+            //                     basicProperties: null,
+            //                     body: body);
+
         }
 
         public async Task Start()
         {
-            _emailCartProcessor.ProcessMessageAsync += OnEmailCartRequestReceived;
-            _emailCartProcessor.ProcessErrorAsync += ErrorHandler;
-            await _emailCartProcessor.StartProcessingAsync();
 
-            _registerUserProcessor.ProcessMessageAsync += OnUserRegisterRequestReceived;
-            _registerUserProcessor.ProcessErrorAsync += ErrorHandler;
-            await _registerUserProcessor.StartProcessingAsync();
+            var factory = new ConnectionFactory { HostName = "localhost" };
+            using var connection = factory.CreateConnection();
+            channel = connection.CreateModel();
+            var consumer = new EventingBasicConsumer(channel);
+            consumer.Received += (model, ea) =>
+            {
+                var body = ea.Body.ToArray();
+                var message = Encoding.UTF8.GetString(body);
+                Console.WriteLine($" [x] Received {message}");
+                //channel.BasicAck(ea.DeliveryTag, false);
+            };
+            channel.BasicConsume(queue: registerUserQueue,
+                                 autoAck: true,
+                                 consumer: consumer);
 
-            _emailOrderPlacedProcessor.ProcessMessageAsync += OnOrderPlacedRequestReceived;
-            _emailOrderPlacedProcessor.ProcessErrorAsync += ErrorHandler;
-            await _emailOrderPlacedProcessor.StartProcessingAsync();
+            //var factory = new ConnectionFactory { HostName = "localhost" };
+            //connection = factory.CreateConnection();
+            //using var channel = 
+
+
+
+
+
+            //using var channel = connection.CreateModel();
+
+
+            //var consumer = new EventingBasicConsumer(channel);
+            //consumer.Received += (model, ea) =>
+            //{
+            //    OnUserRegisterRequestReceived(ea);
+            //};
+            //channel.BasicConsume(queue: registerUserQueue,
+            //                     autoAck: true,
+            //                     consumer: consumer);
+
+            //_emailCartProcessor.ProcessErrorAsync += ErrorHandler;
+            //await _emailCartProcessor.StartProcessingAsync();
+
+            //_registerUserProcessor.ProcessMessageAsync += OnUserRegisterRequestReceived;
+            //_registerUserProcessor.ProcessErrorAsync += ErrorHandler;
+            //await _registerUserProcessor.StartProcessingAsync();
+
+            //_emailOrderPlacedProcessor.ProcessMessageAsync += OnOrderPlacedRequestReceived;
+            //_emailOrderPlacedProcessor.ProcessErrorAsync += ErrorHandler;
+            //await _emailOrderPlacedProcessor.StartProcessingAsync();
         }
 
-       
+
 
         public async Task Stop()
         {
-            await _emailCartProcessor.StopProcessingAsync();
-            await _emailCartProcessor.DisposeAsync();
+            //    await _emailCartProcessor.StopProcessingAsync();
+            //    await _emailCartProcessor.DisposeAsync();
 
-            await _registerUserProcessor.StopProcessingAsync();
-            await _registerUserProcessor.DisposeAsync();
+            //    await _registerUserProcessor.StopProcessingAsync();
+            //    await _registerUserProcessor.DisposeAsync();
 
-            await _emailOrderPlacedProcessor.StopProcessingAsync();
-            await _emailOrderPlacedProcessor.DisposeAsync();
+            //    await _emailOrderPlacedProcessor.StopProcessingAsync();
+            //    await _emailOrderPlacedProcessor.DisposeAsync();
         }
 
         private async Task OnEmailCartRequestReceived(ProcessMessageEventArgs args)
@@ -77,26 +125,7 @@ namespace Mango.Services.EmailAPI.Messaging
             try
             {
                 //TODO - try to log email
-                await _emailService.EmailCartAndLog(objMessage);  
-                await args.CompleteMessageAsync(args.Message);
-            }
-            catch (Exception ex) {
-                throw;
-            }
-
-        }
-
-        private async Task OnOrderPlacedRequestReceived(ProcessMessageEventArgs args)
-        {
-            //this is where you will receive message
-            var message = args.Message;
-            var body = Encoding.UTF8.GetString(message.Body);
-
-            RewardsMessage objMessage = JsonConvert.DeserializeObject<RewardsMessage>(body);
-            try
-            {
-                //TODO - try to log email
-                await _emailService.LogOrderPlaced(objMessage);
+                await _emailService.EmailCartAndLog(objMessage);
                 await args.CompleteMessageAsync(args.Message);
             }
             catch (Exception ex)
@@ -106,17 +135,43 @@ namespace Mango.Services.EmailAPI.Messaging
 
         }
 
-        private async Task OnUserRegisterRequestReceived(ProcessMessageEventArgs args)
+        private void Form1_Load(object sender, BasicDeliverEventArgs e)
         {
-            var message = args.Message;
-            var body = Encoding.UTF8.GetString(message.Body);
+            // Add your form load event handling code here.
+        }
+        
 
-            string email = JsonConvert.DeserializeObject<string>(body);
+        //private async Task OnOrderPlacedRequestReceived(ProcessMessageEventArgs args)
+        //{
+        //    //this is where you will receive message
+        //    var message = args.Message;
+        //    var body = Encoding.UTF8.GetString(message.Body);
+
+        //    RewardsMessage objMessage = JsonConvert.DeserializeObject<RewardsMessage>(body);
+        //    try
+        //    {
+        //        //TODO - try to log email
+        //        await _emailService.LogOrderPlaced(objMessage);
+        //        await args.CompleteMessageAsync(args.Message);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw;
+        //    }
+
+        //}
+
+        private async Task OnUserRegisterRequestReceived(BasicDeliverEventArgs args)
+        {
+            var body = args.Body.ToArray();
+            var message = Encoding.UTF8.GetString(body);
+
+            string email = JsonConvert.DeserializeObject<string>(message);
             try
             {
                 //TODO - try to log email
                 await _emailService.RegisterUserEmailAndLog(email);
-                await args.CompleteMessageAsync(args.Message);
+                //await args.CompleteMessageAsync(args.Message);
             }
             catch (Exception ex)
             {
@@ -130,6 +185,6 @@ namespace Mango.Services.EmailAPI.Messaging
             return Task.CompletedTask;
         }
 
-       
+
     }
 }

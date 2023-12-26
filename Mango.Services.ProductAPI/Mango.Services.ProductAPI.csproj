@@ -7,22 +7,43 @@
   </PropertyGroup>
 
   <ItemGroup>
-	  <PackageReference Include="AutoMapper" Version="12.0.1" />
-	  <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
-	  <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0-preview.3.23177.8" />
-	  <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0-preview.3.23177.8" />
-	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0-preview.3.23174.2" />
-	  <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0-preview.3.23174.2" />
-	  <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0-preview.3.23174.2">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-	  </PackageReference>
-	  <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <None Remove="Protos\productRating.proto" />
   </ItemGroup>
 
   <ItemGroup>
+	  <PackageReference Include="AutoMapper" Version="12.0.1" />
+	  <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+	  <PackageReference Include="Google.Protobuf" Version="3.25.1" />
+	  <PackageReference Include="Mango.Contracts.Product" Version="1.0.0" />
+	  <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
+	  <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.0" />
+	  <PackageReference Include="Grpc.Net.Client" Version="2.59.0" />
+	  <PackageReference Include="Grpc.Tools" Version="2.60.0">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
+	  <PackageReference Include="MassTransit.RabbitMQ" Version="8.1.3" />
+
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
+	  <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<Protobuf Include="Protos\productRating.proto" GrpcServices="Client" />
+	</ItemGroup>
+
+	<ItemGroup>
     <Folder Include="wwwroot\ProductImages\" />
   </ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Mango.MessageBus\Mango.MessageBus.csproj" />
+	</ItemGroup>
 
   <ItemGroup>
     <Content Update="appsettings.Production.json">

@@ -4,13 +4,11 @@ using Mango.Services.OrderAPI;
 using Mango.Services.OrderAPI.Data;
 using Mango.Services.OrderAPI.Extensions;
 using Mango.Services.OrderAPI.Utility;
-using Mango.Services.ShoppingCartAPI.Service;
 using Mango.Services.ShoppingCartAPI.Service.IService;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,15 +16,31 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDbContext>(option =>
 {
-    option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    option.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 IMapper mapper = MappingConfig.RegisterMaps().CreateMapper();
 builder.Services.AddSingleton(mapper);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IProductService, Mango.Services.ShoppingCartAPI.Service.ProductService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<BackendApiAuthenticationHttpClientHandler>();
 builder.Services.AddScoped<IMessageBus, MessageBus>();
+builder.Services.AddScoped<IMessageBus, MessageBus>();
+builder.Services.AddMassTransit(x =>
+{
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host("localhost", "/", h =>
+        {
+            h.Username("guest");
+            h.Password("guest");
+        });
+
+        cfg.ConfigureEndpoints(context);
+    });
+});
+
+builder.Services.AddMassTransitHostedService();
 builder.Services.AddHttpClient("Product", u => u.BaseAddress =
 new Uri(builder.Configuration["ServiceUrls:ProductAPI"])).AddHttpMessageHandler<BackendApiAuthenticationHttpClientHandler>();
 builder.Services.AddControllers();

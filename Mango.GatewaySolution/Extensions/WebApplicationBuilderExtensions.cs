@@ -14,7 +14,7 @@ namespace Mango.GatewaySolution.Extensions
             var issuer = settingsSection.GetValue<string>("Issuer");
             var audience = settingsSection.GetValue<string>("Audience");
 
-            var key = Encoding.ASCII.GetBytes(secret);
+            //var key = Encoding.ASCII.GetBytes(secret);
 
 
             builder.Services.AddAuthentication(x =>
@@ -26,7 +26,7 @@ namespace Mango.GatewaySolution.Extensions
                 x.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    //IssuerSigningKey = new SymmetricSecurityKey(key),
                     ValidateIssuer = true,
                     ValidIssuer = issuer,
                     ValidAudience = audience,

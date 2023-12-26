@@ -3,7 +3,6 @@ using System;
 using Mango.Services.OrderAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -16,35 +15,29 @@ namespace Mango.Services.OrderAPI.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.0-preview.3.23174.2")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
-
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.0-preview.3.23174.2");
 
             modelBuilder.Entity("Mango.Services.OrderAPI.Models.OrderDetails", b =>
                 {
                     b.Property<int>("OrderDetailsId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderDetailsId"));
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Count")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("OrderHeaderId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<double>("Price")
-                        .HasColumnType("float");
+                        .HasColumnType("REAL");
 
                     b.Property<int>("ProductId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("ProductName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("OrderDetailsId");
 
@@ -57,42 +50,40 @@ namespace Mango.Services.OrderAPI.Migrations
                 {
                     b.Property<int>("OrderHeaderId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderHeaderId"));
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("CouponCode")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<double>("Discount")
-                        .HasColumnType("float");
+                        .HasColumnType("REAL");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("OrderTime")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
 
                     b.Property<double>("OrderTotal")
-                        .HasColumnType("float");
+                        .HasColumnType("REAL");
 
                     b.Property<string>("PaymentIntentId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Phone")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("StripeSessionId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("OrderHeaderId");
 
